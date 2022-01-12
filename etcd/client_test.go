@@ -8,7 +8,7 @@ import (
 )
 
 func Test_NewClient(t *testing.T) {
-	c, err := New("rqlite")
+	c, err := New("rqlite", nil)
 	if err != nil {
 		t.Fatalf("failed to create new client: %s", err.Error())
 	}
@@ -18,7 +18,7 @@ func Test_NewClient(t *testing.T) {
 }
 
 func Test_InitializeLeader(t *testing.T) {
-	c, _ := New(randomString())
+	c, _ := New(randomString(), nil)
 	_, _, _, ok, err := c.GetLeader()
 	if err != nil {
 		t.Fatalf("failed to GetLeader: %s", err.Error())
@@ -48,7 +48,7 @@ func Test_InitializeLeader(t *testing.T) {
 }
 
 func Test_InitializeLeaderConflict(t *testing.T) {
-	c, _ := New(randomString())
+	c, _ := New(randomString(), nil)
 	_, _, _, ok, err := c.GetLeader()
 	if err != nil {
 		t.Fatalf("failed to GetLeader: %s", err.Error())
