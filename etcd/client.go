@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"os"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
@@ -15,17 +17,33 @@ type Client struct {
 	leaderKey string
 }
 
-type node struct {
-	ID      string `json:"id,omitempty"`
-	APIAddr string `json:"api_addr,omitempty"`
-	Addr    string `json:"addr,omitempty"`
+// Config stores the configuration for the etcd client.
+type Config clientv3.Config
+
+// NewConfigFromFile parses the file at path and returns a Config.
+func NewConfigFromFile(path string) (*Config, error) {
+	cfgFile, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer cfgFile.Close()
+
+	b, err := ioutil.ReadAll(cfgFile)
+	if err != nil {
+		return nil, err
+	}
+
+	var cfg Config
+	if err := json.Unmarshal(b, &cfg); err != nil {
+		return nil, err
+	}
+	return &cfg, nil
 }
 
-// New returns an instantiated etcd client.
-func New(key string) (*Client, error) {
-	c, err := clientv3.New(clientv3.Config{
-		Endpoints: []string{"localhost:2379"},
-	})
+// New returns an instantiated etcd client. If cfg is nil, use
+// the default config.
+func New(key string, cfg *Config) (*Client, error) {
+	c, err := clientv3.New(*etcdConfigFromClientConfig(cfg))
 	if err != nil {
 		return nil, err
 	}
@@ -105,4 +123,19 @@ func (c *Client) SetLeader(id, apiAddr, addr string) error {
 // Close closes the client.
 func (c *Client) Close() error {
 	return c.client.Close()
+}
+
+func etcdConfigFromClientConfig(cfg *Config) *clientv3.Config {
+	if cfg == nil {
+		return &clientv3.Config{
+			Endpoints: []string{"localhost:2379"},
+		}
+	}
+	return (*clientv3.Config)(cfg)
+}
+
+type node struct {
+	ID      string `json:"id,omitempty"`
+	APIAddr string `json:"api_addr,omitempty"`
+	Addr    string `json:"addr,omitempty"`
 }
