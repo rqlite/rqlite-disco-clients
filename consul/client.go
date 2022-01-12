@@ -3,6 +3,8 @@ package consul // Maybe put in own repo -- rqlite-disco-clients
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"os"
 
 	"github.com/hashicorp/consul/api"
 )
@@ -91,6 +93,26 @@ type Config struct {
 
 	// TLSConfig is the TLS config for talking to Consul
 	TLSConfig *TLSConfig `json:"tls_config,omitempty"`
+}
+
+// NewConfigFromFile parses the file at path and returns a Config.
+func NewConfigFromFile(path string) (*Config, error) {
+	cfgFile, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer cfgFile.Close()
+
+	b, err := ioutil.ReadAll(cfgFile)
+	if err != nil {
+		return nil, err
+	}
+
+	var cfg Config
+	if err := json.Unmarshal(b, &cfg); err != nil {
+		return nil, err
+	}
+	return &cfg, nil
 }
 
 // New returns an instantiated Consul client. If the cfg is nil, the default
