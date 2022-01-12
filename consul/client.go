@@ -74,7 +74,7 @@ func (c *Client) InitializeLeader(id, apiAddr, addr string) (bool, error) {
 	return ok, nil
 }
 
-// SetLeader unconditionally sets the leader to the gien details.
+// SetLeader unconditionally sets the leader to the given details.
 func (c *Client) SetLeader(id, apiAddr, addr string) error {
 	b, err := json.Marshal(node{
 		ID:      id,
