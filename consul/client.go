@@ -7,18 +7,20 @@ import (
 	"github.com/hashicorp/consul/api"
 )
 
+// Client represents a Consul client.
 type Client struct {
 	client    *api.KV
 	key       string
 	leaderKey string
 }
 
-type Node struct {
+type node struct {
 	ID      string `json:"id,omitempty"`
 	APIAddr string `json:"api_addr,omitempty"`
 	Addr    string `json:"addr,omitempty"` // Needs TLS settings, etc I think so anyway. Maybe join handles?
 }
 
+// New returns an instantiated Consul client.
 func New(key string) (*Client, error) {
 	c, err := api.NewClient(api.DefaultConfig())
 	if err != nil {
@@ -31,6 +33,8 @@ func New(key string) (*Client, error) {
 	}, nil
 }
 
+// GetLeader returns the leader as recorded in Consul. If a leader exists, ok will
+// be set to true, false otherwise.
 func (c *Client) GetLeader() (id string, apiAddr string, addr string, ok bool, e error) {
 	pair, _, err := c.client.Get(c.leaderKey, nil)
 	if err != nil {
@@ -42,7 +46,7 @@ func (c *Client) GetLeader() (id string, apiAddr string, addr string, ok bool, e
 		return
 	}
 
-	n := Node{}
+	n := node{}
 	if err := json.Unmarshal(pair.Value, &n); err != nil {
 		e = err
 		return
@@ -50,8 +54,11 @@ func (c *Client) GetLeader() (id string, apiAddr string, addr string, ok bool, e
 	return n.ID, n.APIAddr, n.Addr, true, nil
 }
 
+// InitializeLeader sets the leader to the given details, but only if no leader
+// has already been set. This operation is a check-and-set type operation. If
+// initialization succeeds, ok is set to true.
 func (c *Client) InitializeLeader(id, apiAddr, addr string) (bool, error) {
-	b, err := json.Marshal(Node{
+	b, err := json.Marshal(node{
 		ID:      id,
 		APIAddr: apiAddr,
 		Addr:    addr,
@@ -67,8 +74,9 @@ func (c *Client) InitializeLeader(id, apiAddr, addr string) (bool, error) {
 	return ok, nil
 }
 
+// SetLeader unconditionally sets the leader to the gien details.
 func (c *Client) SetLeader(id, apiAddr, addr string) error {
-	b, err := json.Marshal(Node{
+	b, err := json.Marshal(node{
 		ID:      id,
 		APIAddr: apiAddr,
 		Addr:    addr,
@@ -84,6 +92,7 @@ func (c *Client) SetLeader(id, apiAddr, addr string) error {
 	return nil
 }
 
+// Close closes the client.
 func (c *Client) Close() error {
 	return nil
 }

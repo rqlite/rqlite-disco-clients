@@ -8,18 +8,20 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
+// Client represents an etcd client.
 type Client struct {
 	client    *clientv3.Client
 	key       string
 	leaderKey string
 }
 
-type Node struct {
+type node struct {
 	ID      string `json:"id,omitempty"`
 	APIAddr string `json:"api_addr,omitempty"`
 	Addr    string `json:"addr,omitempty"`
 }
 
+// New returns an instantiated etcd client.
 func New(key string) (*Client, error) {
 	c, err := clientv3.New(clientv3.Config{
 		Endpoints: []string{"localhost:2379"},
@@ -34,6 +36,8 @@ func New(key string) (*Client, error) {
 	}, nil
 }
 
+// GetLeader returns the leader as recorded in Consul. If a leader exists, ok will
+// be set to true, false otherwise.
 func (c *Client) GetLeader() (id string, apiAddr string, addr string, ok bool, e error) {
 	kv := clientv3.NewKV(c.client)
 	resp, err := kv.Get(context.Background(), c.leaderKey)
@@ -46,7 +50,7 @@ func (c *Client) GetLeader() (id string, apiAddr string, addr string, ok bool, e
 		return
 	}
 
-	n := Node{}
+	n := node{}
 	if err := json.Unmarshal(resp.Kvs[0].Value, &n); err != nil {
 		e = err
 		return
@@ -54,8 +58,11 @@ func (c *Client) GetLeader() (id string, apiAddr string, addr string, ok bool, e
 	return n.ID, n.APIAddr, n.Addr, true, nil
 }
 
+// InitializeLeader sets the leader to the given details, but only if no leader
+// has already been set. This operation is a check-and-set type operation. If
+// initialization succeeds, ok is set to true.
 func (c *Client) InitializeLeader(id, apiAddr, addr string) (bool, error) {
-	b, err := json.Marshal(Node{
+	b, err := json.Marshal(node{
 		ID:      id,
 		APIAddr: apiAddr,
 		Addr:    addr,
@@ -76,8 +83,9 @@ func (c *Client) InitializeLeader(id, apiAddr, addr string) (bool, error) {
 	return resp.Succeeded, nil
 }
 
+// SetLeader unconditionally sets the leader to the gien details.
 func (c *Client) SetLeader(id, apiAddr, addr string) error {
-	b, err := json.Marshal(Node{
+	b, err := json.Marshal(node{
 		ID:      id,
 		APIAddr: apiAddr,
 		Addr:    addr,
@@ -94,6 +102,7 @@ func (c *Client) SetLeader(id, apiAddr, addr string) error {
 	return nil
 }
 
+// Close closes the client.
 func (c *Client) Close() error {
 	return c.client.Close()
 }
