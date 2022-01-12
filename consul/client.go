@@ -71,7 +71,7 @@ type Config struct {
 	Datacenter string `json:"datacenter,omitempty"`
 
 	// BasicAuth sets the HTTP BasicAuth credentials for talking to Consul
-	BasicAuth BasicAuthConfig `json:"basic_auth,omitempty"`
+	BasicAuth *BasicAuthConfig `json:"basic_auth,omitempty"`
 
 	// Token is used to provide a per-request ACL token
 	// which overrides the agent's default token.
@@ -90,7 +90,7 @@ type Config struct {
 	Partition string `json:"partition,omitempty"`
 
 	// TLSConfig is the TLS config for talking to Consul
-	TLSConfig TLSConfig `json:"tls_config,omitempty"`
+	TLSConfig *TLSConfig `json:"tls_config,omitempty"`
 }
 
 // New returns an instantiated Consul client. If the cfg is nil, the default
@@ -181,5 +181,37 @@ func consulConfigFromClientConfig(cfg *Config) *api.Config {
 	if cfg == nil {
 		return api.DefaultConfig()
 	}
-	return &api.Config{}
+
+	var basicAuth *api.HttpBasicAuth
+	if cfg.BasicAuth != nil {
+		basicAuth = &api.HttpBasicAuth{
+			Username: cfg.BasicAuth.Username,
+			Password: cfg.BasicAuth.Password,
+		}
+	}
+
+	apiConfig := &api.Config{
+		Address:    cfg.Address,
+		Scheme:     cfg.Scheme,
+		Datacenter: cfg.Datacenter,
+		HttpAuth:   basicAuth,
+		Token:      cfg.Token,
+		TokenFile:  cfg.TokenFile,
+		Namespace:  cfg.Namespace,
+		Partition:  cfg.Partition,
+	}
+
+	if cfg.TLSConfig != nil {
+		apiConfig.TLSConfig.Address = cfg.TLSConfig.Address
+		apiConfig.TLSConfig.CAFile = cfg.TLSConfig.CAFile
+		apiConfig.TLSConfig.CAPath = cfg.TLSConfig.CAPath
+		apiConfig.TLSConfig.CAPem = cfg.TLSConfig.CAPem
+		apiConfig.TLSConfig.CAFile = cfg.TLSConfig.CertFile
+		apiConfig.TLSConfig.CertPEM = cfg.TLSConfig.CertPEM
+		apiConfig.TLSConfig.KeyFile = cfg.TLSConfig.KeyFile
+		apiConfig.TLSConfig.KeyPEM = cfg.TLSConfig.KeyPEM
+		apiConfig.TLSConfig.InsecureSkipVerify = cfg.TLSConfig.InsecureSkipVerify
+	}
+
+	return apiConfig
 }
