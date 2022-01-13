@@ -18,10 +18,14 @@ func Test_NewClient(t *testing.T) {
 	if got, exp := c.String(), "etcd"; got != exp {
 		t.Fatalf("wrong name for client, got %s, exp %s", got, exp)
 	}
+	if err := c.Close(); err != nil {
+		t.Fatalf("failed to close client: %s", err.Error())
+	}
 }
 
 func Test_InitializeLeader(t *testing.T) {
 	c, _ := New(randomString(), nil)
+	defer c.Close()
 	_, _, _, ok, err := c.GetLeader()
 	if err != nil {
 		t.Fatalf("failed to GetLeader: %s", err.Error())
@@ -52,6 +56,7 @@ func Test_InitializeLeader(t *testing.T) {
 
 func Test_InitializeLeaderConflict(t *testing.T) {
 	c, _ := New(randomString(), nil)
+	defer c.Close()
 	_, _, _, ok, err := c.GetLeader()
 	if err != nil {
 		t.Fatalf("failed to GetLeader: %s", err.Error())
