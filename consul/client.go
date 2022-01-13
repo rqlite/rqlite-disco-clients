@@ -125,7 +125,7 @@ func New(key string, cfg *Config) (*Client, error) {
 	return &Client{
 		client:    c.KV(),
 		key:       key,
-		leaderKey: fmt.Sprintf("/%s/leader", key),
+		leaderKey: fmt.Sprintf("%s/leader", key),
 	}, nil
 }
 
