@@ -120,6 +120,11 @@ func (c *Client) SetLeader(id, apiAddr, addr string) error {
 	return nil
 }
 
+// String implements the Stringer interface.
+func (c *Client) String() string {
+	return "etcd"
+}
+
 // Close closes the client.
 func (c *Client) Close() error {
 	return c.client.Close()

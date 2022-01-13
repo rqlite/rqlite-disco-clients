@@ -15,6 +15,9 @@ func Test_NewClient(t *testing.T) {
 	if c == nil {
 		t.Fatalf("returned client is nil")
 	}
+	if got, exp := c.String(), "etcd"; got != exp {
+		t.Fatalf("wrong name for client, got %s, exp %s", got, exp)
+	}
 }
 
 func Test_InitializeLeader(t *testing.T) {
