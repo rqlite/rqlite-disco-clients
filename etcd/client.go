@@ -50,7 +50,7 @@ func New(key string, cfg *Config) (*Client, error) {
 	return &Client{
 		client:    c,
 		key:       key,
-		leaderKey: fmt.Sprintf("rqlite/%s/leader", key),
+		leaderKey: fmt.Sprintf("/%s/leader", key),
 	}, nil
 }
 
