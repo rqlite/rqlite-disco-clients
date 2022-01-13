@@ -1,7 +1,10 @@
 package etcd
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"math/rand"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -20,6 +23,52 @@ func Test_NewClient(t *testing.T) {
 	}
 	if err := c.Close(); err != nil {
 		t.Fatalf("failed to close client: %s", err.Error())
+	}
+}
+
+func Test_NewClientConfigConnectOK(t *testing.T) {
+	cfgFile := mustWriteConfigToTmpFile(&Config{
+		Endpoints: []string{"localhost:2379"},
+	})
+	defer os.Remove(cfgFile)
+
+	cfg, err := NewConfigFromFile(cfgFile)
+	if err != nil {
+		t.Fatalf("failed to get config from file: %s", err.Error())
+	}
+
+	client, err := New(randomString(), cfg)
+	if err != nil {
+		t.Fatalf("failed to create new client with config: %s", err.Error())
+	}
+
+	err = client.SetLeader("2", "http://localhost:4003", "localhost:4004")
+	if err != nil {
+		t.Fatalf("error when setting leader: %s", err.Error())
+	}
+}
+
+func Test_NewClientConfigConnectFail(t *testing.T) {
+	t.Skip() // Can't get timeout to work.....uh.
+	cfgFile := mustWriteConfigToTmpFile(&Config{
+		Endpoints:   []string{"http://254.0.0.1:12345"},
+		DialTimeout: mustParseDuration("1s"),
+	})
+	defer os.Remove(cfgFile)
+
+	cfg, err := NewConfigFromFile(cfgFile)
+	if err != nil {
+		t.Fatalf("failed to get config from file: %s", err.Error())
+	}
+
+	client, err := New(randomString(), cfg)
+	if err != nil {
+		t.Fatalf("failed to create new client with config: %s", err.Error())
+	}
+
+	err = client.SetLeader("2", "http://localhost:4003", "localhost:4004")
+	if err == nil {
+		t.Fatalf("should have failed to connect to etcd")
 	}
 }
 
@@ -100,4 +149,33 @@ func randomString() string {
 		output.WriteString(string(randomChar))
 	}
 	return output.String()
+}
+
+func mustWriteConfigToTmpFile(cfg *Config) string {
+	f := mustTempFile()
+	b, err := json.MarshalIndent(cfg, "", " ")
+	if err != nil {
+		panic("failed to JSON marshal config")
+	}
+	if err := ioutil.WriteFile(f, b, 0644); err != nil {
+		panic("failed to write JSON to file")
+	}
+	return f
+}
+
+func mustTempFile() string {
+	tmpfile, err := ioutil.TempFile("", "rqlite-db-test")
+	if err != nil {
+		panic(err.Error())
+	}
+	tmpfile.Close()
+	return tmpfile.Name()
+}
+
+func mustParseDuration(t string) time.Duration {
+	d, err := time.ParseDuration(t)
+	if err != nil {
+		panic("failed to parse duration")
+	}
+	return d
 }
