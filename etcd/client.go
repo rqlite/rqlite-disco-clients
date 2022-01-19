@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 
@@ -33,6 +34,20 @@ func NewConfigFromFile(path string) (*Config, error) {
 		return nil, err
 	}
 
+	var cfg Config
+	if err := json.Unmarshal(b, &cfg); err != nil {
+		return nil, err
+	}
+	return &cfg, nil
+}
+
+// NewConfigFromReader parses the data returned by the reader and
+// returns a Config.
+func NewConfigFromReader(r io.Reader) (*Config, error) {
+	b, err := io.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
 	var cfg Config
 	if err := json.Unmarshal(b, &cfg); err != nil {
 		return nil, err
