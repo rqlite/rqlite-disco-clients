@@ -18,9 +18,6 @@ type Client struct {
 	leaderKey string
 }
 
-// Config stores the configuration for the etcd client.
-type Config clientv3.Config
-
 // NewConfigFromFile parses the file at path and returns a Config.
 func NewConfigFromFile(path string) (*Config, error) {
 	cfgFile, err := os.Open(path)
