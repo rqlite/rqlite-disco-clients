@@ -126,7 +126,7 @@ func (c *Client) SetLeader(id, apiAddr, addr string) error {
 
 // String implements the Stringer interface.
 func (c *Client) String() string {
-	return "consul"
+	return "consul-kv"
 }
 
 // Close closes the client.

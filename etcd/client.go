@@ -134,7 +134,7 @@ func (c *Client) SetLeader(id, apiAddr, addr string) error {
 
 // String implements the Stringer interface.
 func (c *Client) String() string {
-	return "etcd"
+	return "etcd-kv"
 }
 
 // Close closes the client.

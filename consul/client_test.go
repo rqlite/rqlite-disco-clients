@@ -18,7 +18,7 @@ func Test_NewClient(t *testing.T) {
 	if c == nil {
 		t.Fatalf("returned client is nil")
 	}
-	if got, exp := c.String(), "consul"; got != exp {
+	if got, exp := c.String(), "consul-kv"; got != exp {
 		t.Fatalf("wrong name for client, got %s, exp %s", got, exp)
 	}
 	if err := c.Close(); err != nil {
