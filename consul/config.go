@@ -1,5 +1,28 @@
 package consul
 
+const (
+	// exampleConfig is an example of how the Consul config file
+	// should be structured.
+	exampleConfig = `
+{
+	"address": "1.2.3.4",
+	"scheme": "https",
+	"datacenter": "my_dc",
+	"basic_auth": {
+		"username": "me",
+		"password": "my password"
+	},
+	"token": "my_token",
+	"token_file": "my_token_file",
+	"namespace": "my_namespace",
+	"partition": "my_partition",
+	"tls_config": {
+		"insecure_skip_verify": true
+	}
+}
+`
+)
+
 // BasicAuthConfig stores HTTP Basic Auth credentials.
 type BasicAuthConfig struct {
 	Username string `json:"username,omitempty"`
