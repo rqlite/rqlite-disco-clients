@@ -51,7 +51,7 @@ type Config struct {
 	Address string `json:"address,omitempty"`
 
 	// Scheme is the URI scheme for the Consul server
-	Scheme string `json:"schema,omitempty"`
+	Scheme string `json:"scheme,omitempty"`
 
 	// Datacenter to use. If not provided, the default agent datacenter is used.
 	Datacenter string `json:"datacenter,omitempty"`
