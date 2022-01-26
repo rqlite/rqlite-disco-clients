@@ -6,7 +6,8 @@ import (
 
 const (
 	// exampleConfig is an example of how the etcd config file
-	// should be structured.
+	// should be structured. The time-related values are in
+	// units of nanoseconds.
 	exampleConfig = `
 {
 	"endpoints": ["http://1.2.3.4:8080", "https://5.6.7.8"],
