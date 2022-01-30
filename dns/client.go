@@ -17,8 +17,11 @@ type Client struct {
 }
 
 // NewConfigFromReader returns a Client configuration from the data read
-// from r.
+// from r. If r is nil, a nil Configuration is returned.
 func NewConfigFromReader(r io.Reader) (*Config, error) {
+	if r == nil {
+		return nil, nil
+	}
 	b, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
