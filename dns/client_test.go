@@ -60,3 +60,23 @@ func Test_NewClientLookupDouble(t *testing.T) {
 		t.Fatalf("failed to get correct address: %s", addrs)
 	}
 }
+
+func Test_NewClientLookupLocalhost(t *testing.T) {
+	client := New(nil)
+	client.name = "localhost"
+	client.port = 8080
+
+	addrs, err := client.Lookup()
+	if err != nil {
+		t.Fatalf("failed to lookup host: %s", err.Error())
+	}
+
+	// At least one address should be IPv4, testing that an actual lookup
+	// took place.
+	for i := range addrs {
+		if addrs[i] == "127.0.0.1:8080" {
+			return
+		}
+	}
+	t.Fatalf("failed to get local address %s", addrs)
+}
