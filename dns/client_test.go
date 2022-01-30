@@ -13,7 +13,18 @@ func Test_NewClient(t *testing.T) {
 	}
 }
 
-func Test_NewClientLookupSingle(t *testing.T) {
+func Test_ClientStats(t *testing.T) {
+	client := New(nil)
+	stats, err := client.Stats()
+	if err != nil {
+		t.Fatalf("failed to get stats: %s", err.Error())
+	}
+	if stats == nil {
+		t.Fatalf("nil stats returned")
+	}
+}
+
+func Test_ClientLookupSingle(t *testing.T) {
 	client := New(nil)
 
 	lookupFn := func(host string) ([]net.IP, error) {
@@ -36,7 +47,7 @@ func Test_NewClientLookupSingle(t *testing.T) {
 	}
 }
 
-func Test_NewClientLookupDouble(t *testing.T) {
+func Test_ClientLookupDouble(t *testing.T) {
 	client := New(nil)
 	client.name = "qux"
 	client.port = 8080
@@ -61,7 +72,7 @@ func Test_NewClientLookupDouble(t *testing.T) {
 	}
 }
 
-func Test_NewClientLookupLocalhost(t *testing.T) {
+func Test_ClientLookupLocalhost(t *testing.T) {
 	client := New(nil)
 	client.name = "localhost"
 	client.port = 8080
