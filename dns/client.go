@@ -5,12 +5,19 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"sync"
+	"time"
 )
 
 // Client is a type can resolve a host for use by rqlite.
 type Client struct {
 	name string
 	port int
+
+	mu            sync.Mutex
+	lastContact   time.Time
+	lastAddresses []string
+	lastError     error
 
 	// Can be explicitly set for test purposes.
 	lookupFn func(host string) ([]net.IP, error)
@@ -55,13 +62,45 @@ func New(cfg *Config) *Client {
 
 // Lookup returns the network addresses resolved for the client's host value.
 func (c *Client) Lookup() ([]string, error) {
-	ips, err := c.lookupFn(c.name)
-	if err != nil {
-		return nil, err
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	var ips []net.IP
+	ips, c.lastError = c.lookupFn(c.name)
+	if c.lastError != nil {
+		return nil, c.lastError
 	}
+
+	c.lastError = nil
 	addrs := make([]string, len(ips))
 	for i := range ips {
 		addrs[i] = fmt.Sprintf("%s:%d", ips[i].String(), c.port)
 	}
+
+	c.lastContact = time.Now()
+	c.lastAddresses = make([]string, len(addrs))
+	copy(c.lastAddresses, addrs)
+
 	return addrs, nil
+}
+
+// Stats returns some basic diagnostics information about the client.
+func (c *Client) Stats() (map[string]interface{}, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	stats := map[string]interface{}{
+		"name": c.name,
+		"port": c.port,
+	}
+
+	if c.lastContact.IsZero() {
+		if c.lastError != nil {
+			stats["last_error"] = c.lastError.Error()
+		} else {
+			stats["last_contact"] = c.lastContact
+			stats["last_addresses"] = c.lastAddresses
+		}
+	}
+	return stats, nil
 }
