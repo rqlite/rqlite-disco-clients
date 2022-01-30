@@ -1,0 +1,62 @@
+package dns
+
+import (
+	"net"
+	"reflect"
+	"testing"
+)
+
+func Test_NewClient(t *testing.T) {
+	client := New(nil)
+	if client == nil {
+		t.Fatalf("failed to create default client")
+	}
+}
+
+func Test_NewClientLookupSingle(t *testing.T) {
+	client := New(nil)
+
+	lookupFn := func(host string) ([]net.IP, error) {
+		if exp, got := "rqlite", host; exp != got {
+			t.Fatalf("incorrect host resolved, exp %s, got %s", exp, got)
+		}
+		return []net.IP{net.IPv4(8, 8, 8, 8)}, nil
+	}
+	client.lookupFn = lookupFn
+
+	addrs, err := client.Lookup()
+	if err != nil {
+		t.Fatalf("failed to lookup host: %s", err.Error())
+	}
+	if exp, got := 1, len(addrs); exp != got {
+		t.Fatalf("wrong number of addresses returned, exp %d, got %d", exp, got)
+	}
+	if !reflect.DeepEqual(addrs, []string{"8.8.8.8:4001"}) {
+		t.Fatalf("failed to get correct address: %s", addrs)
+	}
+}
+
+func Test_NewClientLookupDouble(t *testing.T) {
+	client := New(nil)
+	client.name = "qux"
+	client.port = 8080
+
+	lookupFn := func(host string) ([]net.IP, error) {
+		if exp, got := client.name, host; exp != got {
+			t.Fatalf("incorrect host resolved, exp %s, got %s", exp, got)
+		}
+		return []net.IP{net.IPv4(1, 2, 3, 4), net.IPv4(5, 6, 7, 8)}, nil
+	}
+	client.lookupFn = lookupFn
+
+	addrs, err := client.Lookup()
+	if err != nil {
+		t.Fatalf("failed to lookup host: %s", err.Error())
+	}
+	if exp, got := 2, len(addrs); exp != got {
+		t.Fatalf("wrong number of addresses returned, exp %d, got %d", exp, got)
+	}
+	if !reflect.DeepEqual(addrs, []string{"1.2.3.4:8080", "5.6.7.8:8080"}) {
+		t.Fatalf("failed to get correct address: %s", addrs)
+	}
+}
