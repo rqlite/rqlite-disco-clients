@@ -89,6 +89,7 @@ func (c *Client) Stats() (map[string]interface{}, error) {
 	defer c.mu.Unlock()
 
 	stats := map[string]interface{}{
+		"mode": "dns",
 		"name": c.name,
 		"port": c.port,
 	}
