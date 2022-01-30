@@ -93,7 +93,7 @@ func (c *Client) Stats() (map[string]interface{}, error) {
 		"port": c.port,
 	}
 
-	if c.lastContact.IsZero() {
+	if !c.lastContact.IsZero() {
 		if c.lastError != nil {
 			stats["last_error"] = c.lastError.Error()
 		} else {
