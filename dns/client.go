@@ -89,17 +89,18 @@ func (c *Client) Stats() (map[string]interface{}, error) {
 	defer c.mu.Unlock()
 
 	stats := map[string]interface{}{
+		"mode": "dns",
 		"name": c.name,
 		"port": c.port,
 	}
 
-	if !c.lastContact.IsZero() {
-		if c.lastError != nil {
-			stats["last_error"] = c.lastError.Error()
-		} else {
-			stats["last_contact"] = c.lastContact
-			stats["last_addresses"] = c.lastAddresses
-		}
+	if c.lastError != nil {
+		stats["last_error"] = c.lastError.Error()
 	}
+	if !c.lastContact.IsZero() {
+		stats["last_contact"] = c.lastContact
+		stats["last_addresses"] = c.lastAddresses
+	}
+
 	return stats, nil
 }
