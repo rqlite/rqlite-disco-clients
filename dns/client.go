@@ -70,14 +70,13 @@ func (c *Client) Lookup() ([]string, error) {
 	if c.lastError != nil {
 		return nil, c.lastError
 	}
+	c.lastContact = time.Now()
 
-	c.lastError = nil
 	addrs := make([]string, len(ips))
 	for i := range ips {
 		addrs[i] = fmt.Sprintf("%s:%d", ips[i].String(), c.port)
 	}
 
-	c.lastContact = time.Now()
 	c.lastAddresses = make([]string, len(addrs))
 	copy(c.lastAddresses, addrs)
 
