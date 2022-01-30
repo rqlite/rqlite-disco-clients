@@ -13,8 +13,8 @@ const (
 
 type Config struct {
 	// Name is the hostname to resolve for node addresses.
-	Name string `json:"name",omitempty"`
+	Name string `json:"name,omitempty"`
 
 	// Port is the port resolved names will be listening on.
-	Port int `json:"port",omitempty`
+	Port int `json:"port,omitempty"`
 }
