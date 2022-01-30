@@ -38,8 +38,11 @@ func NewConfigFromFile(path string) (*Config, error) {
 }
 
 // NewConfigFromReader parses the data returned by the reader and
-// returns a Config.
+// returns a Config. A nil reader results in nil config.
 func NewConfigFromReader(r io.Reader) (*Config, error) {
+	if r == nil {
+		return nil, nil
+	}
 	b, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
