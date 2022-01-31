@@ -11,6 +11,7 @@ const (
 `
 )
 
+// Config is the configuration for a DNS disco client.
 type Config struct {
 	// Name is the hostname to resolve for node addresses.
 	Name string `json:"name,omitempty"`
