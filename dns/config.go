@@ -7,7 +7,9 @@ const (
 	// nodes it should attempt to form a cluster with. Port
 	// is the HTTP port those nodes will be listening on.
 	// Because Port can only be set once, every node in the
-	// cluster must listen to the same HTTP port.
+	// cluster must listen to the same HTTP port. If you need
+	// different ports for different rqlite nodes, then you
+	// should use DNS SRV disco mode.
 	exampleConfig = `
 {
 	"name": "rqlite",
