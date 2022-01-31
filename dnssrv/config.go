@@ -13,7 +13,7 @@ const (
 	// node IP addresses and ports. All other portions of the DNS
 	// SRV record (priority, weight, TTL, etc.) are ignored.
 	// Note that the 'proto' part of the DNS SRV hostname
-	// is always 'tcp' and cannot be changed. 
+	// is always 'tcp' and cannot be changed.
 	exampleConfig = `
 {
 	"name": "rqlite-svc",
