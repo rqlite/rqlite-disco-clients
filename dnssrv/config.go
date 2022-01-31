@@ -2,7 +2,8 @@ package dnssrv
 
 const (
 	// exampleConfig is an example of how the DNS SRV config file
-	// should be structured.
+	// should be structured. 'name' is the host to resolve for the
+	// DNS records, and 'service' is the service to request.
 	exampleConfig = `
 {
 	"name": "rqlite",
