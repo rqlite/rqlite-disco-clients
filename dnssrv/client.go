@@ -101,7 +101,7 @@ func (c *Client) Stats() (map[string]interface{}, error) {
 	defer c.mu.Unlock()
 
 	stats := map[string]interface{}{
-		"mode":    "dnssrv",
+		"mode":    "dns-srv",
 		"name":    c.name,
 		"service": c.service,
 	}
