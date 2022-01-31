@@ -34,7 +34,12 @@ func Test_ClientLookupSingle(t *testing.T) {
 		if exp, got := "rqlite", name; exp != got {
 			t.Fatalf("incorrect name resolved, exp %s, got %s", exp, got)
 		}
-		return "", []*net.SRV{{"rqlite.node", 1000, 1, 10}}, nil
+		return "", []*net.SRV{{
+			Target:   "rqlite.node",
+			Port:     1000,
+			Priority: 1,
+			Weight:   10,
+		}}, nil
 	}
 	client.lookupSRVFn = lookupSRVFn
 
@@ -70,7 +75,20 @@ func Test_ClientLookupDouble(t *testing.T) {
 		if exp, got := "rqlite-name", name; exp != got {
 			t.Fatalf("incorrect name resolved, exp %s, got %s", exp, got)
 		}
-		return "", []*net.SRV{{"rqlite.node.1", 1000, 1, 10}, {"rqlite.node.2", 2000, 1, 10}}, nil
+		return "", []*net.SRV{
+			{
+				Target:   "rqlite.node.1",
+				Port:     1000,
+				Priority: 1,
+				Weight:   10,
+			},
+			{
+				Target:   "rqlite.node.2",
+				Port:     2000,
+				Priority: 1,
+				Weight:   10,
+			},
+		}, nil
 	}
 	client.lookupSRVFn = lookupSRVFn
 
