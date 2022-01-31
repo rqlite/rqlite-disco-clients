@@ -4,10 +4,20 @@ const (
 	// exampleConfig is an example of how the DNS SRV config file
 	// should be structured. 'name' is the host to resolve for the
 	// DNS records, and 'service' is the service to request.
+	//
+	// In the example below, rqlite would look up:
+	//
+	//  _rqlite-svc._tcp.rqlite.com
+	//
+	// and resolve the returned names for the actual
+	// node IP addresses and ports. All other portions of the DNS
+	// SRV record (priority, weight, TTL, etc.) are ignored.
+	// Note that the 'proto' part of the DNS SRV hostname
+	// is always 'tcp' and cannot be changed. 
 	exampleConfig = `
 {
-	"name": "rqlite",
-	"service": "rqlite"
+	"name": "rqlite-svc",
+	"service": "rqlite.com"
 }
 `
 )
