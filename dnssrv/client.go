@@ -104,7 +104,7 @@ func (c *Client) Stats() (map[string]interface{}, error) {
 		"mode":      "dns-srv",
 		"name":      c.name,
 		"service":   c.service,
-		"dns_name:": fmt.Sprintf("_%s._tcp.%s.", c.name, c.service),
+		"dns_name:": fmt.Sprintf("_%s._tcp.%s.", c.service, c.name),
 	}
 
 	if c.lastError != nil {
