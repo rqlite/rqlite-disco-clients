@@ -101,9 +101,10 @@ func (c *Client) Stats() (map[string]interface{}, error) {
 	defer c.mu.Unlock()
 
 	stats := map[string]interface{}{
-		"mode":    "dns-srv",
-		"name":    c.name,
-		"service": c.service,
+		"mode":      "dns-srv",
+		"name":      c.name,
+		"service":   c.service,
+		"dns_name:": fmt.Sprintf("_%s._tcp.%s.", c.name, c.service),
 	}
 
 	if c.lastError != nil {
