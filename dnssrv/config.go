@@ -16,8 +16,8 @@ const (
 	// is always 'tcp' and cannot be changed.
 	exampleConfig = `
 {
-	"name": "rqlite-svc",
-	"service": "rqlite.com"
+	"name": "rqlite.com",
+	"service": "rqlite-svc"
 }
 `
 )
