@@ -5,7 +5,7 @@ const (
 	// should be structured.
 	exampleConfig = `
 {
-	"address": "1.2.3.4",
+	"address": "1.2.3.4:8500",
 	"scheme": "https",
 	"datacenter": "my_dc",
 	"basic_auth": {
