@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/hashicorp/consul/api"
 )
@@ -50,6 +51,9 @@ func NewConfigFromReader(r io.Reader) (*Config, error) {
 	var cfg Config
 	if err := json.Unmarshal(b, &cfg); err != nil {
 		return nil, err
+	}
+	if strings.HasPrefix(cfg.Address, "http") {
+		return nil, fmt.Errorf("address should not contain HTTP or HTTPS")
 	}
 	return &cfg, nil
 }
