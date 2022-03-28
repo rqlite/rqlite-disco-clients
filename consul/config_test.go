@@ -8,20 +8,7 @@ import (
 const (
 	badConfigHTTP = `
 {
-	"address": "http://1.2.3.4",
-	"scheme": "https",
-	"datacenter": "my_dc",
-	"basic_auth": {
-		"username": "me",
-		"password": "my password"
-	},
-	"token": "my_token",
-	"token_file": "my_token_file",
-	"namespace": "my_namespace",
-	"partition": "my_partition",
-	"tls_config": {
-		"insecure_skip_verify": true
-	}
+	"address": "http://1.2.3.4"
 }
 `
 )
