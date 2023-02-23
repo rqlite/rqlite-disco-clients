@@ -176,7 +176,7 @@ func consulConfigFromClientConfig(cfg *Config) *api.Config {
 		apiConfig.TLSConfig.CAFile = cfg.TLSConfig.CAFile
 		apiConfig.TLSConfig.CAPath = cfg.TLSConfig.CAPath
 		apiConfig.TLSConfig.CAPem = cfg.TLSConfig.CAPem
-		apiConfig.TLSConfig.CAFile = cfg.TLSConfig.CertFile
+		apiConfig.TLSConfig.CertFile = cfg.TLSConfig.CertFile
 		apiConfig.TLSConfig.CertPEM = cfg.TLSConfig.CertPEM
 		apiConfig.TLSConfig.KeyFile = cfg.TLSConfig.KeyFile
 		apiConfig.TLSConfig.KeyPEM = cfg.TLSConfig.KeyPEM
