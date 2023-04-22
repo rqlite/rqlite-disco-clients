@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"net/url"
 	"sync"
 	"time"
 )
@@ -81,6 +82,29 @@ func (c *Client) Lookup() ([]string, error) {
 	copy(c.lastAddresses, addrs)
 
 	return addrs, nil
+}
+
+// LookupURLs returns a slice of URLs which can be used to attempt to join the
+// cluster. Only one of the accesses is guaranteed to work, but all are
+// returned so that the client can try them all.
+func (c *Client) LookupURLs() ([]*url.URL, error) {
+	addrs, err := c.Lookup()
+	if err != nil {
+		return nil, err
+	}
+
+	protocols := []string{"http", "https", "raft"}
+	urls := make([]*url.URL, len(addrs)*len(protocols))
+	for i, addr := range addrs {
+		for j, protocol := range protocols {
+			urls[i*len(protocols)+j] = &url.URL{
+				Scheme: protocol,
+				Host:   addr,
+			}
+		}
+	}
+
+	return urls, nil
 }
 
 // Stats returns some basic diagnostics information about the client.

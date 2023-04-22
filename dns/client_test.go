@@ -2,7 +2,9 @@ package dns
 
 import (
 	"net"
+	"net/url"
 	"reflect"
+	"sort"
 	"testing"
 )
 
@@ -39,11 +41,37 @@ func Test_ClientLookupSingle(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to lookup host: %s", err.Error())
 	}
-	if exp, got := 1, len(addrs); exp != got {
-		t.Fatalf("wrong number of addresses returned, exp %d, got %d", exp, got)
-	}
 	if !reflect.DeepEqual(addrs, []string{"8.8.8.8:4001"}) {
 		t.Fatalf("failed to get correct address: %s", addrs)
+	}
+}
+
+func Test_ClientLookupURLsSingle(t *testing.T) {
+	client := New(nil)
+
+	lookupFn := func(host string) ([]net.IP, error) {
+		if exp, got := "rqlite", host; exp != got {
+			t.Fatalf("incorrect host resolved, exp %s, got %s", exp, got)
+		}
+		return []net.IP{net.IPv4(8, 8, 8, 8)}, nil
+	}
+	client.lookupFn = lookupFn
+
+	urls, err := client.LookupURLs()
+	if err != nil {
+		t.Fatalf("failed to lookup host: %s", err.Error())
+	}
+
+	expURLs := []*url.URL{
+		{Scheme: "http", Host: "8.8.8.8:4001"},
+		{Scheme: "https", Host: "8.8.8.8:4001"},
+		{Scheme: "raft", Host: "8.8.8.8:4001"},
+	}
+	sortURLs(urls)
+	sortURLs(expURLs)
+
+	if !reflect.DeepEqual(urls, expURLs) {
+		t.Fatalf("failed to get correct address: got %s, exp %s", urls, expURLs)
 	}
 }
 
@@ -64,11 +92,43 @@ func Test_ClientLookupDouble(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to lookup host: %s", err.Error())
 	}
-	if exp, got := 2, len(addrs); exp != got {
-		t.Fatalf("wrong number of addresses returned, exp %d, got %d", exp, got)
-	}
 	if !reflect.DeepEqual(addrs, []string{"1.2.3.4:8080", "5.6.7.8:8080"}) {
 		t.Fatalf("failed to get correct address: %s", addrs)
+	}
+}
+
+func Test_ClientLookupURLsDouble(t *testing.T) {
+	client := New(nil)
+	client.name = "qux"
+	client.port = 8080
+
+	lookupFn := func(host string) ([]net.IP, error) {
+		if exp, got := client.name, host; exp != got {
+			t.Fatalf("incorrect host resolved, exp %s, got %s", exp, got)
+		}
+		return []net.IP{net.IPv4(1, 2, 3, 4), net.IPv4(5, 6, 7, 8)}, nil
+	}
+
+	client.lookupFn = lookupFn
+
+	urls, err := client.LookupURLs()
+	if err != nil {
+		t.Fatalf("failed to lookup host: %s", err.Error())
+	}
+
+	expURLs := []*url.URL{
+		{Scheme: "http", Host: "1.2.3.4:8080"},
+		{Scheme: "https", Host: "1.2.3.4:8080"},
+		{Scheme: "raft", Host: "1.2.3.4:8080"},
+		{Scheme: "http", Host: "5.6.7.8:8080"},
+		{Scheme: "https", Host: "5.6.7.8:8080"},
+		{Scheme: "raft", Host: "5.6.7.8:8080"},
+	}
+	sortURLs(urls)
+	sortURLs(expURLs)
+
+	if !reflect.DeepEqual(urls, expURLs) {
+		t.Fatalf("failed to get correct address: got %s, exp %s", urls, expURLs)
 	}
 }
 
@@ -90,4 +150,11 @@ func Test_ClientLookupLocalhost(t *testing.T) {
 		}
 	}
 	t.Fatalf("failed to get local address %s", addrs)
+}
+
+// sort a slice of URLs by their string representation
+func sortURLs(urls []*url.URL) {
+	sort.Slice(urls, func(i, j int) bool {
+		return urls[i].String() < urls[j].String()
+	})
 }
