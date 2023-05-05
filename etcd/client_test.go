@@ -48,6 +48,29 @@ func Test_NewClientConfigConnectOK(t *testing.T) {
 	}
 }
 
+func Test_NewClientConfigConnectOKEnv(t *testing.T) {
+	t.Setenv("ETCD_ENDPOINT", "localhost:2379")
+	cfgFile := mustWriteConfigToTmpFile(&Config{
+		Endpoints: []string{"${ETCD_ENDPOINT}"},
+	})
+	defer os.Remove(cfgFile)
+
+	cfg, err := NewConfigFromFile(cfgFile)
+	if err != nil {
+		t.Fatalf("failed to get config from file: %s", err.Error())
+	}
+
+	client, err := New(randomString(), cfg)
+	if err != nil {
+		t.Fatalf("failed to create new client with config: %s", err.Error())
+	}
+
+	err = client.SetLeader("2", "http://localhost:4003", "localhost:4004")
+	if err != nil {
+		t.Fatalf("error when setting leader: %s", err.Error())
+	}
+}
+
 func Test_NewClientConfigReaderConnectOK(t *testing.T) {
 	cfgFile := mustWriteConfigToTmpFile(&Config{
 		Endpoints: []string{"localhost:2379"},
