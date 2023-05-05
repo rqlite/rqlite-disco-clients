@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/consul/api"
+	"github.com/rqlite/rqlite-disco-clients/expand"
 )
 
 // Client represents a Consul client.
@@ -32,7 +33,7 @@ func NewConfigFromFile(path string) (*Config, error) {
 	}
 
 	var cfg Config
-	if err := json.Unmarshal(b, &cfg); err != nil {
+	if err := json.Unmarshal(expand.ExpandEnvBytes(b), &cfg); err != nil {
 		return nil, err
 	}
 	return &cfg, nil
@@ -49,7 +50,7 @@ func NewConfigFromReader(r io.Reader) (*Config, error) {
 		return nil, err
 	}
 	var cfg Config
-	if err := json.Unmarshal(b, &cfg); err != nil {
+	if err := json.Unmarshal(expand.ExpandEnvBytes(b), &cfg); err != nil {
 		return nil, err
 	}
 	if strings.HasPrefix(cfg.Address, "http") {

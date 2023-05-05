@@ -7,6 +7,8 @@ import (
 	"net"
 	"sync"
 	"time"
+
+	"github.com/rqlite/rqlite-disco-clients/expand"
 )
 
 // Client is a type can resolve a host for use by rqlite.
@@ -34,7 +36,7 @@ func NewConfigFromReader(r io.Reader) (*Config, error) {
 		return nil, err
 	}
 	var cfg Config
-	if err := json.Unmarshal(b, &cfg); err != nil {
+	if err := json.Unmarshal(expand.ExpandEnvBytes(b), &cfg); err != nil {
 		return nil, err
 	}
 	return &cfg, nil
