@@ -8,7 +8,7 @@ jobs:
     docker:
       # specify the version
       - image: cimg/go:1.20.0
-      - image: consul
+      - image: hashicorp/consul
       - image: gcr.io/etcd-development/etcd:v3.5.1
 
     #### TEMPLATE_NOTE: go expects specific checkout path representing url
@@ -28,7 +28,7 @@ jobs:
     docker:
       # specify the version
       - image: cimg/go:1.20.0
-      - image: consul
+      - image: hashicorp/consul
       - image: gcr.io/etcd-development/etcd:v3.5.1
 
     #### TEMPLATE_NOTE: go expects specific checkout path representing url

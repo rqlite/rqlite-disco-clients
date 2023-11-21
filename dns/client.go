@@ -62,6 +62,27 @@ func New(cfg *Config) *Client {
 	return client
 }
 
+// NewWithPort returns an instantiated DNS client, with an explicit default port.
+// If the cfg is nil, the default config is used but the port is overridden when
+// using the default config.
+func NewWithPort(cfg *Config, port int) *Client {
+	client := &Client{
+		name:     "rqlite",
+		port:     port,
+		lookupFn: net.LookupIP,
+	}
+
+	if cfg != nil {
+		if cfg.Name != "" {
+			client.name = cfg.Name
+		}
+		if cfg.Port != 0 {
+			client.port = cfg.Port
+		}
+	}
+	return client
+}
+
 // Lookup returns the network addresses resolved for the client's host value.
 func (c *Client) Lookup() ([]string, error) {
 	c.mu.Lock()
