@@ -63,6 +63,45 @@ func Test_ClientLookupSingle(t *testing.T) {
 	}
 }
 
+func Test_ClientLookupSingleIPv6(t *testing.T) {
+	client := New(nil)
+
+	lookupSRVFn := func(service, proto, name string) (string, []*net.SRV, error) {
+		if exp, got := "rqlite", service; exp != got {
+			t.Fatalf("incorrect service resolved, exp %s, got %s", exp, got)
+		}
+		if exp, got := "rqlite", name; exp != got {
+			t.Fatalf("incorrect name resolved, exp %s, got %s", exp, got)
+		}
+		return "", []*net.SRV{{
+			Target:   "rqlite.node",
+			Port:     1000,
+			Priority: 1,
+			Weight:   10,
+		}}, nil
+	}
+	client.lookupSRVFn = lookupSRVFn
+
+	lookupFn := func(host string) ([]net.IP, error) {
+		if exp, got := "rqlite.node", host; exp != got {
+			t.Fatalf("incorrect host resolved, exp %s, got %s", exp, got)
+		}
+		return []net.IP{net.ParseIP("2001:db8::68")}, nil
+	}
+	client.lookupFn = lookupFn
+
+	addrs, err := client.Lookup()
+	if err != nil {
+		t.Fatalf("failed to lookup SRV record: %s", err.Error())
+	}
+	if exp, got := 1, len(addrs); exp != got {
+		t.Fatalf("wrong number of addresses returned, exp %d, got %d", exp, got)
+	}
+	if !reflect.DeepEqual(addrs, []string{"[2001:db8::68]:1000"}) {
+		t.Fatalf("failed to get correct address: %s", addrs)
+	}
+}
+
 func Test_ClientLookupDouble(t *testing.T) {
 	client := New(nil)
 	client.name = "rqlite-name"

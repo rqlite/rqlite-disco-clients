@@ -47,6 +47,29 @@ func Test_ClientLookupSingle(t *testing.T) {
 	}
 }
 
+func Test_ClientLookupSingleIPv6(t *testing.T) {
+	client := New(nil)
+
+	lookupFn := func(host string) ([]net.IP, error) {
+		if exp, got := "rqlite", host; exp != got {
+			t.Fatalf("incorrect host resolved, exp %s, got %s", exp, got)
+		}
+		return []net.IP{net.ParseIP("2001:db8::68")}, nil
+	}
+	client.lookupFn = lookupFn
+
+	addrs, err := client.Lookup()
+	if err != nil {
+		t.Fatalf("failed to lookup host: %s", err.Error())
+	}
+	if exp, got := 1, len(addrs); exp != got {
+		t.Fatalf("wrong number of addresses returned, exp %d, got %d", exp, got)
+	}
+	if !reflect.DeepEqual(addrs, []string{"[2001:db8::68]:4001"}) {
+		t.Fatalf("failed to get correct address: %s", addrs)
+	}
+}
+
 func Test_ClientLookupSingleWithPort(t *testing.T) {
 	client := NewWithPort(nil, 5001)
 
