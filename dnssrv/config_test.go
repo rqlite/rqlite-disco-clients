@@ -25,7 +25,7 @@ func Test_LoadExampleConfig(t *testing.T) {
 		t.Fatalf("nil config")
 	}
 
-	if cfg.Name != "rqlite.com" || cfg.Service != "rqlite-svc" {
+	if cfg.Name != "rqlite.com" || cfg.Service != "rqlite-raft" {
 		t.Fatalf("invalid config generated")
 	}
 }
