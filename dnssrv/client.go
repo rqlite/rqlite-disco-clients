@@ -87,7 +87,7 @@ func (c *Client) Lookup() ([]string, error) {
 		}
 
 		for j := range ips {
-			addrs = append(addrs, fmt.Sprintf("%s:%d", ips[j].String(), records[i].Port))
+			addrs = append(addrs, net.JoinHostPort(ips[j].String(), fmt.Sprintf("%d", records[i].Port)))
 		}
 	}
 
