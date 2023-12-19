@@ -2,9 +2,9 @@ package dns
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net"
+	"strconv"
 	"sync"
 	"time"
 
@@ -97,7 +97,7 @@ func (c *Client) Lookup() ([]string, error) {
 
 	addrs := make([]string, len(ips))
 	for i := range ips {
-		addrs[i] = fmt.Sprintf("%s:%d", ips[i].String(), c.port)
+		addrs[i] = net.JoinHostPort(ips[i].String(), strconv.Itoa(c.port))
 	}
 
 	c.lastAddresses = make([]string, len(addrs))
