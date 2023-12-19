@@ -7,7 +7,7 @@ const (
 	//
 	// In the example below, rqlite would look up:
 	//
-	//  _rqlite-svc._tcp.rqlite.com
+	//  _rqlite-raft._tcp.rqlite.com
 	//
 	// and resolve the returned names for the actual
 	// node IP addresses and ports. All other portions of the DNS
@@ -17,7 +17,7 @@ const (
 	exampleConfig = `
 {
 	"name": "rqlite.com",
-	"service": "rqlite-svc"
+	"service": "rqlite-raft"
 }
 `
 )
