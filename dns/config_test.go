@@ -25,7 +25,7 @@ func Test_LoadExampleConfig(t *testing.T) {
 		t.Fatalf("nil config")
 	}
 
-	if cfg.Name != "rqlite" || cfg.Port != 4001 {
+	if cfg.Name != "rqlite" || cfg.Port != 4002 {
 		t.Fatalf("invalid config generated")
 	}
 }
