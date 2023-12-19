@@ -13,7 +13,7 @@ const (
 	exampleConfig = `
 {
 	"name": "rqlite",
-	"port": 4001
+	"port": 4002
 }
 `
 )
