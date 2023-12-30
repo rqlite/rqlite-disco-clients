@@ -2,13 +2,20 @@ package dns
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net"
+	"os"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/rqlite/rqlite-disco-clients/expand"
+)
+
+const (
+	DNSOverrideEnv = "RQLITE_DISCO_DNS_HOSTS"
 )
 
 // Client is a type can resolve a host for use by rqlite.
@@ -84,10 +91,26 @@ func NewWithPort(cfg *Config, port int) *Client {
 }
 
 // Lookup returns the network addresses resolved for the client's host value.
+//
+// If the environment variable RQLITE_DISCO_DNS_HOSTS is set, its value is used
+// instead of that used by DNS resolution. That value is a comma-separated list
+// of addresses, each of which is a host:port pair. This is useful for testing,
+// and is not suitable for production use.
 func (c *Client) Lookup() ([]string, error) {
+	val, ok := os.LookupEnv(DNSOverrideEnv)
+	if ok {
+		addrs := make([]string, 0)
+		for _, addr := range strings.Split(val, ",") {
+			if _, _, err := net.SplitHostPort(addr); err != nil {
+				return nil, fmt.Errorf("%s: invalid address %s", DNSOverrideEnv, addr)
+			}
+			addrs = append(addrs, addr)
+		}
+		return addrs, nil
+	}
+
 	c.mu.Lock()
 	defer c.mu.Unlock()
-
 	var ips []net.IP
 	ips, c.lastError = c.lookupFn(c.name)
 	if c.lastError != nil {

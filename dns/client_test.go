@@ -2,6 +2,7 @@ package dns
 
 import (
 	"net"
+	"os"
 	"reflect"
 	"testing"
 )
@@ -26,7 +27,6 @@ func Test_ClientStats(t *testing.T) {
 
 func Test_ClientLookupSingle(t *testing.T) {
 	client := New(nil)
-
 	lookupFn := func(host string) ([]net.IP, error) {
 		if exp, got := "rqlite", host; exp != got {
 			t.Fatalf("incorrect host resolved, exp %s, got %s", exp, got)
@@ -47,9 +47,25 @@ func Test_ClientLookupSingle(t *testing.T) {
 	}
 }
 
+func Test_ClientLookupSingle_Env(t *testing.T) {
+	os.Setenv(DNSOverrideEnv, "1.2.3.4:4001")
+	defer os.Unsetenv(DNSOverrideEnv)
+
+	client := New(nil)
+	addrs, err := client.Lookup()
+	if err != nil {
+		t.Fatalf("failed to lookup host: %s", err.Error())
+	}
+	if exp, got := 1, len(addrs); exp != got {
+		t.Fatalf("wrong number of addresses returned, exp %d, got %d", exp, got)
+	}
+	if !reflect.DeepEqual(addrs, []string{"1.2.3.4:4001"}) {
+		t.Fatalf("failed to get correct address: %s", addrs)
+	}
+}
+
 func Test_ClientLookupSingleIPv6(t *testing.T) {
 	client := New(nil)
-
 	lookupFn := func(host string) ([]net.IP, error) {
 		if exp, got := "rqlite", host; exp != got {
 			t.Fatalf("incorrect host resolved, exp %s, got %s", exp, got)
@@ -72,7 +88,6 @@ func Test_ClientLookupSingleIPv6(t *testing.T) {
 
 func Test_ClientLookupSingleWithPort(t *testing.T) {
 	client := NewWithPort(nil, 5001)
-
 	lookupFn := func(host string) ([]net.IP, error) {
 		if exp, got := "rqlite", host; exp != got {
 			t.Fatalf("incorrect host resolved, exp %s, got %s", exp, got)
@@ -97,7 +112,6 @@ func Test_ClientLookupDouble(t *testing.T) {
 	client := New(nil)
 	client.name = "qux"
 	client.port = 8080
-
 	lookupFn := func(host string) ([]net.IP, error) {
 		if exp, got := client.name, host; exp != got {
 			t.Fatalf("incorrect host resolved, exp %s, got %s", exp, got)
@@ -115,6 +129,34 @@ func Test_ClientLookupDouble(t *testing.T) {
 	}
 	if !reflect.DeepEqual(addrs, []string{"1.2.3.4:8080", "5.6.7.8:8080"}) {
 		t.Fatalf("failed to get correct address: %s", addrs)
+	}
+}
+
+func Test_ClientLookupDouble_Env(t *testing.T) {
+	os.Setenv(DNSOverrideEnv, "1.2.3.4:8080,5.6.7.8:8080")
+	defer os.Unsetenv(DNSOverrideEnv)
+
+	client := New(nil)
+	addrs, err := client.Lookup()
+	if err != nil {
+		t.Fatalf("failed to lookup host: %s", err.Error())
+	}
+	if exp, got := 2, len(addrs); exp != got {
+		t.Fatalf("wrong number of addresses returned, exp %d, got %d", exp, got)
+	}
+	if !reflect.DeepEqual(addrs, []string{"1.2.3.4:8080", "5.6.7.8:8080"}) {
+		t.Fatalf("failed to get correct address: %s", addrs)
+	}
+}
+
+func Test_ClientLookupDouble_EnvError(t *testing.T) {
+	os.Setenv(DNSOverrideEnv, "1.2.3.4:8080,5.6.7.8")
+	defer os.Unsetenv(DNSOverrideEnv)
+
+	client := New(nil)
+	_, err := client.Lookup()
+	if err == nil {
+		t.Fatalf("expected error due to bad address")
 	}
 }
 
