@@ -49,6 +49,8 @@ func Test_ClientLookupSingle(t *testing.T) {
 
 func Test_ClientLookupSingle_Env(t *testing.T) {
 	os.Setenv(DNSOverrideEnv, "1.2.3.4:4001")
+	defer os.Unsetenv(DNSOverrideEnv)
+
 	client := New(nil)
 	addrs, err := client.Lookup()
 	if err != nil {
@@ -132,6 +134,8 @@ func Test_ClientLookupDouble(t *testing.T) {
 
 func Test_ClientLookupDouble_Env(t *testing.T) {
 	os.Setenv(DNSOverrideEnv, "1.2.3.4:8080,5.6.7.8:8080")
+	defer os.Unsetenv(DNSOverrideEnv)
+
 	client := New(nil)
 	addrs, err := client.Lookup()
 	if err != nil {
@@ -147,6 +151,8 @@ func Test_ClientLookupDouble_Env(t *testing.T) {
 
 func Test_ClientLookupDouble_EnvError(t *testing.T) {
 	os.Setenv(DNSOverrideEnv, "1.2.3.4:8080,5.6.7.8")
+	defer os.Unsetenv(DNSOverrideEnv)
+
 	client := New(nil)
 	_, err := client.Lookup()
 	if err == nil {
