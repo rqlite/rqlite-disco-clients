@@ -127,10 +127,10 @@ func (c *Client) Lookup() ([]string, error) {
 		for i := range ips {
 			addrs[i] = net.JoinHostPort(ips[i].String(), strconv.Itoa(c.port))
 		}
-		slices.Sort(addrs)
 	}
 
 	// Record and log the resolved addresses if they have changed.
+	slices.Sort(addrs)
 	if !slices.Equal(c.lastAddresses, addrs) {
 		c.logger.Printf("resolved addresses: %v", addrs)
 		c.lastAddresses = make([]string, len(addrs))
