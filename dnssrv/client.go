@@ -122,6 +122,8 @@ func (c *Client) Stats() (map[string]interface{}, error) {
 	}
 	if !c.lastContact.IsZero() {
 		stats["last_contact"] = c.lastContact
+	}
+	if len(c.lastAddresses) > 0 {
 		stats["last_addresses"] = c.lastAddresses
 	}
 
