@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -27,6 +29,7 @@ type Client struct {
 	lastContact   time.Time
 	lastAddresses []string
 	lastError     error
+	logger        *log.Logger
 
 	// Can be explicitly set for test purposes.
 	lookupFn func(host string) ([]net.IP, error)
@@ -55,6 +58,7 @@ func New(cfg *Config) *Client {
 	client := &Client{
 		name:     "rqlite",
 		port:     4001,
+		logger:   log.New(os.Stderr, "[disco-dns] ", log.LstdFlags),
 		lookupFn: net.LookupIP,
 	}
 
@@ -76,6 +80,7 @@ func NewWithPort(cfg *Config, port int) *Client {
 	client := &Client{
 		name:     "rqlite",
 		port:     port,
+		logger:   log.New(os.Stderr, "[disco-dns] ", log.LstdFlags),
 		lookupFn: net.LookupIP,
 	}
 
@@ -122,10 +127,13 @@ func (c *Client) Lookup() ([]string, error) {
 	for i := range ips {
 		addrs[i] = net.JoinHostPort(ips[i].String(), strconv.Itoa(c.port))
 	}
+	slices.Sort(addrs)
 
-	c.lastAddresses = make([]string, len(addrs))
-	copy(c.lastAddresses, addrs)
-
+	if !slices.Equal(c.lastAddresses, addrs) {
+		c.logger.Printf("resolved addresses: %v", addrs)
+		c.lastAddresses = make([]string, len(addrs))
+		copy(c.lastAddresses, addrs)
+	}
 	return addrs, nil
 }
 

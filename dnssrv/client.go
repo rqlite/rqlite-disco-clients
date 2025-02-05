@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net"
+	"os"
+	"slices"
 	"sync"
 	"time"
 
@@ -20,6 +23,7 @@ type Client struct {
 	lastContact   time.Time
 	lastAddresses []string
 	lastError     error
+	logger        *log.Logger
 
 	// Can be explicitly set for test purposes.
 	lookupSRVFn func(service, proto, name string) (string, []*net.SRV, error)
@@ -49,6 +53,7 @@ func New(cfg *Config) *Client {
 	client := &Client{
 		name:        "rqlite",
 		service:     "rqlite",
+		logger:      log.New(os.Stderr, "[disco-dnssrv] ", log.LstdFlags),
 		lookupSRVFn: net.LookupSRV,
 		lookupFn:    net.LookupIP,
 	}
@@ -91,9 +96,12 @@ func (c *Client) Lookup() ([]string, error) {
 		}
 	}
 
-	c.lastAddresses = make([]string, len(addrs))
-	copy(c.lastAddresses, addrs)
-
+	slices.Sort(addrs)
+	if !slices.Equal(c.lastAddresses, addrs) {
+		c.logger.Printf("resolved addresses: %v", addrs)
+		c.lastAddresses = make([]string, len(addrs))
+		copy(c.lastAddresses, addrs)
+	}
 	return addrs, nil
 }
 
