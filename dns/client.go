@@ -102,33 +102,35 @@ func NewWithPort(cfg *Config, port int) *Client {
 // of addresses, each of which is a host:port pair. This is useful for testing,
 // and is not suitable for production use.
 func (c *Client) Lookup() ([]string, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	var addrs []string
 	val, ok := os.LookupEnv(DNSOverrideEnv)
 	if ok {
-		addrs := make([]string, 0)
+		addrs = make([]string, 0)
 		for _, addr := range strings.Split(val, ",") {
 			if _, _, err := net.SplitHostPort(addr); err != nil {
 				return nil, fmt.Errorf("%s: invalid address %s", DNSOverrideEnv, addr)
 			}
 			addrs = append(addrs, addr)
 		}
-		return addrs, nil
+	} else {
+		var ips []net.IP
+		ips, c.lastError = c.lookupFn(c.name)
+		if c.lastError != nil {
+			return nil, c.lastError
+		}
+		c.lastContact = time.Now()
+
+		addrs = make([]string, len(ips))
+		for i := range ips {
+			addrs[i] = net.JoinHostPort(ips[i].String(), strconv.Itoa(c.port))
+		}
+		slices.Sort(addrs)
 	}
 
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	var ips []net.IP
-	ips, c.lastError = c.lookupFn(c.name)
-	if c.lastError != nil {
-		return nil, c.lastError
-	}
-	c.lastContact = time.Now()
-
-	addrs := make([]string, len(ips))
-	for i := range ips {
-		addrs[i] = net.JoinHostPort(ips[i].String(), strconv.Itoa(c.port))
-	}
-	slices.Sort(addrs)
-
+	// Record and log the resolved addresses if they have changed.
 	if !slices.Equal(c.lastAddresses, addrs) {
 		c.logger.Printf("resolved addresses: %v", addrs)
 		c.lastAddresses = make([]string, len(addrs))
