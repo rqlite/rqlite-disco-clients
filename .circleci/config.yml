@@ -7,7 +7,7 @@ jobs:
   test:
     docker:
       # specify the version
-      - image: cimg/go:1.20.0
+      - image: cimg/go:1.23.0
       - image: hashicorp/consul
       - image: gcr.io/etcd-development/etcd:v3.5.1
 
@@ -21,13 +21,14 @@ jobs:
       # specify any bash command here prefixed with `run: `
       - run: go get -v -t -d ./...
       - run: bash gofmt.sh
+      - run: go version
       - run: go vet ./...
       - run: go test -v ./...
 
   race:
     docker:
       # specify the version
-      - image: cimg/go:1.20.0
+      - image: cimg/go:1.23.0
       - image: hashicorp/consul
       - image: gcr.io/etcd-development/etcd:v3.5.1
 
@@ -39,6 +40,7 @@ jobs:
       - checkout
 
       # specify any bash command here prefixed with `run: `
+      - run: go version
       - run: go get -t -d ./...
       - run:
           command: go test -v -race ./...
